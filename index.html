@@ -18,10 +18,7 @@
             /* 遮蔽怪物出現 */
             overflow: hidden;
         }
-        .airplane_red{
-            width: 100%;
-            height: 100%;
-        }
+
         .box{
             width: 80px;
             height: 80px;
@@ -33,11 +30,6 @@
             width: 30px;
             height: 20px;
             position: absolute;
-        }
-
-        .bullet img{
-            width: 100%;
-            height: 100%;
         }
 
         .information{
@@ -52,7 +44,7 @@
             position: absolute;
         }
 
-        .monster img{
+        .monster img,.start img,.gamestart img,.bullet img,.airplane_red,.explosion img,.start,.gamestart{
             width: 100%;
             height: 100%;
         }
@@ -63,22 +55,17 @@
             position: absolute;
         }
 
-        .explosion img{
-            width: 100%;
-            height: 100%;
-        }
-        .start,.gamestart{
-            width: 100%;
-            height: 100%;
-        }
-
-        .start img,.gamestart img{
-            width: 100%;
-            height: 100%;
-        }
-
         .controldegree,.record{
             width: 800px;
+        }
+
+        .levelup{
+            width: 200px;
+            /* box-shadow: 10px 10px 5px rgb(161, 159, 31); */
+        }
+
+        .levelup img{
+            width: 100%;
         }
 
 
@@ -98,6 +85,8 @@
         <div class="align-self-center ml-5">空白鍵發射子彈</div>
     </div>
     <div class="record mx-auto"></div>
+    <!-- $('.wrap').append(`<div class="monster monster${monster}"><img src="./images/monster.png" alt=""></div>`) -->
+    <div class="levelup"><img src="./images/levelup.png" alt=""></div>
 
     <script
       src="https://code.jquery.com/jquery-3.6.0.js"
@@ -110,6 +99,7 @@
         $('.wrap').on('click','.start',function(){
             startMonsterCreateInterval()
             startMonsterMoveInterval()
+            startCollideInterval()
             $('.start').remove()
             $('.wrap').append(`<div class='gamestart'><img src="./images/space-game-background_131928-19.jpg"></div>`)
             //允許發射
@@ -146,6 +136,9 @@
 
         //局數
         let round=1;
+
+        //絕招點數
+        let skillpoint =0;
 
         //鍵盤控制
         $(document).on('keydown',function(event){
@@ -227,7 +220,7 @@
             }
         }
 
-        let monstercreatespeed =300;
+        let monstercreatespeed =500;
         //創造怪物時間控制
         let  monsterCreateInterval;
         function startMonsterCreateInterval(){
@@ -243,12 +236,20 @@
         }
 
 
-
+        let monsterMovespeed = 50;
         // 怪物移動時間控制
         let monsterMoveInterval;
         function startMonsterMoveInterval(){
         monsterMoveInterval = setInterval(()=>{
             monsterMove();
+        },monsterMovespeed)
+        }
+
+
+        // 判斷碰撞
+        let collideInterval;
+        function startCollideInterval(){
+        collideInterval =setInterval(()=>{
             //判斷是否存在子彈
             if($('.bullet').length>0){
                 Collide();
@@ -275,7 +276,7 @@
         function monsterMove(){
             //計算每一隻怪物前進
             for(let i =0;i<monster;i++){
-                $(`.monster${i}`).css('right','+=10px')
+                $(`.monster${i}`).css('right','+=5px')
                 if(parseInt($(`.monster${i}`).css('right'))>=(800-monsterwidth)){
                     console.log('結束')
                     //清除標籤
@@ -283,6 +284,9 @@
                     //停止計算時間 遊戲結束
                     clearInterval(monsterMoveInterval)
                     clearInterval(monsterCreateInterval)
+                    clearInterval(collideInterval)
+                    //消除子彈
+                    $(`.bullet`).remove()
                     //移除遊戲畫面
                     $('.gamestart').remove();
                     $('.explosion').remove();
@@ -296,7 +300,8 @@
                     //空白鍵調整成不啟動
                     space=0
                     //難度初始化
-                    monstercreatespeed = 300;
+                    monsterMovespeed=50;
+                    monstercreatespeed = 500;
                     //重新拿回start
                     $('.wrap').append(`<div class='start'><img src="./images/start-game.jpg"></div>`)
                     break
@@ -340,25 +345,38 @@
                                 score+=1;
                                 $('.score').text(`分數:${score}分`)
                                 //難度提升
-                                if(score>=5){
-                                    monstercreatespeed=200;
+                                if(score>=15 && score < 16){
+                                    
+                                    monstercreatespeed=400;
+                                    monsterMovespeed=40;
                                     clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
                                     startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
                                 }
-                                if(score>=10){
-                                    monstercreatespeed=150;
-                                    clearInterval(monsterCreateInterval);
+                                if(score>=25 && score<26){
+                                    // monstercreatespeed=400;
+                                    monsterMovespeed=30;
+                                    // clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
                                     startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
                                 }
-                                if(score>=15){
-                                    monstercreatespeed=150;
+                                if(score>=60  && score<61){
+                                    monstercreatespeed=300;
+                                    monsterMovespeed=20;
                                     clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
                                     startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
                                 }
-                                if(score>=20){
-                                    monstercreatespeed=30;
-                                    clearInterval(monsterCreateInterval);
+                                if(score>=100 && score<101){
+                                    // monstercreatespeed=300;
+                                    monsterMovespeed=15;
+                                    // clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
                                     startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
                                 }
                             }
                         }
