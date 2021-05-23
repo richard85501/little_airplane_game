@@ -147,7 +147,7 @@
 
         //鍵盤控制
         $(document).on('keydown',function(event){
-            console.log('event',event.which)
+            // console.log('event',event.which)
 
             //上鍵
             if(event.which ===38){
@@ -183,17 +183,17 @@
                 //space=1 才允許發射
                 if(space === 1){
                     //創造子彈
-                    $('.wrap').append(`<div class='bullet bullet${bulletitem}'><img src="./images/bullet.png"><div>`)
+                    $('.wrap').append(`<div class='bullet bullet${bulletitem}' style="top:${bulletStartH}px;left:${bulletStartW}px;"><img src="./images/bullet.png"><div>`)
                     //設定子彈位置
-                    $(`.bullet${bulletitem}`).css({
-                        top:`${bulletStartH}px`,
-                        left:`${bulletStartW}px`,
-                    })
+                    // $(`.bullet${bulletitem}`).css({
+                    //     top:`${bulletStartH}px`,
+                    //     left:`${bulletStartW}px`,
+                    // })
                     //創造下一枚子彈編號
                     bulletitem++;
                 }
             }
-            console.log('-------------------------------')
+            // console.log('-------------------------------')
         })
 
         
@@ -231,6 +231,7 @@
         function startMonsterCreateInterval(){
             monsterCreateInterval=setInterval(()=>{
             //亂數創造怪物高度
+            // console.log("怪物產生")
             monsterH= Math.random()*100*4
             //如果高度+怪物身高爆掉的話 就別生產這隻了 (怪物身高寫死QQ) 
             //如果高度低於子彈發射高度也別生產
@@ -266,12 +267,13 @@
 
         //創造怪物
         function monsterCreate(){
-            $('.wrap').append(`<div class="monster monster${monster}"><img src="./images/monster.png" alt=""></div>`)
+            // $('.wrap').append(`<div class="monster monster${monster}" ><img src="./images/monster.png" alt=""></div>`)
+            $('.wrap').append(`<div class="monster monster${monster}" style="top:${monsterH}px;right:${monsterW}px;"><img src="./images/monster.png" alt=""></div>`)
             //設定怪物位置
-            $(`.monster${monster}`).css({
-                top:`${monsterH}px`,
-                right:`${monsterW}px`,
-            })
+            // $(`.monster${monster}`).css({
+            //     top:`${monsterH}px`,
+            //     right:`${monsterW}px`,
+            // })
             //創造下一隻怪物
             monster+=1;
         }
@@ -307,6 +309,10 @@
                     //難度初始化
                     monsterMovespeed=50;
                     monstercreatespeed = 500;
+                    //子彈編號歸0
+                    bulletitem = 0
+                    //設定怪物編號
+                    monster=0;
                     //重新拿回start
                     $('.wrap').append(`<div class='start'><img src="./images/start-game.jpg"></div>`)
                     break
@@ -330,7 +336,7 @@
                                 $('.wrap').append(`<div class='explosion'><img src="./images/explosion.png"><div></div>`)
                                 //生成爆炸
                                 explosionTop = $(`.bullet${i}`).css('top')
-                                console.log($(`.bullet${i}`).css('top'))
+                                // console.log($(`.bullet${i}`).css('top'))
                                 explosionleft = $(`.bullet${i}`).css('left')
                                 $('.explosion').css({
                                     top:`${explosionTop}`,
@@ -380,7 +386,7 @@
                                     setTimeout(()=>{
                                         $('.levelupdiv').remove()
                                     },1000)
-                                    monstercreatespeed=300;
+                                    monstercreatespeed=400;
                                     monsterMovespeed=20;
                                     clearInterval(monsterCreateInterval);
                                     clearInterval(monsterMoveInterval);
@@ -392,7 +398,7 @@
                                     setTimeout(()=>{
                                         $('.levelupdiv').remove()
                                     },1000)
-                                    monstercreatespeed=200;
+                                    monstercreatespeed=400;
                                     monsterMovespeed=15;
                                     clearInterval(monsterCreateInterval);
                                     clearInterval(monsterMoveInterval);
