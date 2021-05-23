@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>airplane_game</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+        integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
+    <style>
+         .wrap {
+            width: 800px;
+            height: 400px;
+            background-color: #ccc;
+            position: relative;
+            /* 遮蔽怪物出現 */
+            overflow: hidden;
+        }
+
+        .box{
+            width: 80px;
+            height: 80px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .bullet{
+            width: 30px;
+            height: 20px;
+            position: absolute;
+        }
+
+        .information{
+            width: 800px;
+            height: 50px;
+            background-color: #fddddd;
+        }
+
+        .monster{
+            width: 50px;
+            height: 50px;
+            position: absolute;
+        }
+
+        .monster img,.start img,.gamestart img,.bullet img,.airplane_red,.explosion img,.start,.gamestart{
+            width: 100%;
+            height: 100%;
+        }
+
+        .explosion{
+            width: 30px;
+            height: 30px;
+            position: absolute;
+        }
+
+        .controldegree,.record{
+            width: 800px;
+        }
+
+        .levelup{
+            width: 200px;
+        }
+
+        .levelup img{
+            width: 100%;
+        }
+
+        .levelupdiv{
+            display:flex;
+            justify-content: center;
+            position: absolute;
+            top:5px;
+            /* 讓寬度回到100% */
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="wrap mx-auto mt-2">
+        <div class='start'><img src="./images/start-game.jpg"></div>
+        <div class="box">
+            <img class ="airplane_red" src="./images/airplane_red.png" alt="">
+        </div>
+    </div>
+    <div class='information mx-auto mt-2 d-flex'>
+        <div class="align-self-center score ml-2">分數:0分</div>
+        <div class="align-self-center ml-5">請使用方向鍵進行上下移動</div>
+        <div class="align-self-center ml-5">使用(W)&(S)進行加速移動</div>
+        <div class="align-self-center ml-5">空白鍵發射子彈</div>
+    </div>
+    <div class="record mx-auto"></div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.js"
+      integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+      crossorigin="anonymous"></script>
+    <script>
+        //控制發射鍵
+        let space = 0
+        //動態綁定start 才能點到後來新增加的
+        $('.wrap').on('click','.start',function(){
+            startMonsterCreateInterval()
+            startMonsterMoveInterval()
+            startCollideInterval()
+            $('.start').remove()
+            $('.wrap').append(`<div class='gamestart'><img src="./images/space-game-background_131928-19.jpg"></div>`)
+            //允許發射
+            space+=1
+        })
+
+        // 設定飛機移動邊界
+        let rightborder= parseInt($('.wrap').css('width'))-parseInt($('.box').css('width'))
+        let bottomborder= parseInt($('.wrap').css('height'))-parseInt($('.box').css('height'))
+
+        //設定子彈初始位置
+        let bulletStartW = parseInt($('.box').css('width'))
+        let bulletStartH = parseInt($('.box').css('width'))-35
+
+        //子彈編號
+        let bulletitem = 0;
+
+        //設定怪物位置
+        let monsterH=0;
+        let monsterW=-40;
+
+        //設定怪物編號
+        let monster=0;
+
+        //設定分數
+        let score =0;
+
+        //爆炸位置
+        let explosionTop=0
+        let explosionleft=0
+
+        //怪物長度(寫死) 
+        let monsterwidth=50;
+
+        //局數
+        let round=1;
+
+        //絕招點數
+        let skillpoint =0;
+
+        //鍵盤控制
+        $(document).on('keydown',function(event){
+            // console.log('event',event.which)
+            //右鍵
+            if(event.which ===39){
+                if (parseInt($('.box').css('left')) >= rightborder) return
+                $('.box').css('left','+=40px')
+                //改變子彈發射位置
+                bulletStartW+=40;
+            }
+            //左鍵
+            if(event.which ===37){
+                if (parseInt($('.box').css('left')) <= 0) return
+                $('.box').css('left','-=40px')
+                //改變子彈發射位置
+                bulletStartW-=40;
+            }
+            //上鍵
+            if(event.which ===38){
+                if (parseInt($('.box').css('top')) <= 0) return
+                $('.box').css('top','-=20px')
+                //改變子彈發射位置
+                bulletStartH-=20;
+            }
+            //下鍵
+            if(event.which ===40){
+                if (parseInt($('.box').css('top')) >=  bottomborder) return
+                $('.box').css('top','+=20px')
+                //改變子彈發射位置
+                bulletStartH+=20;
+            }
+            //加速上鍵
+            if(event.which ===87){
+                if (parseInt($('.box').css('top')) <= 20) return
+                $('.box').css('top','-=40px')
+                //改變子彈發射位置
+                bulletStartH-=40;
+            }
+            //加速下鍵
+            if(event.which ===83){
+                if (parseInt($('.box').css('top')) >=  bottomborder-20) return
+                $('.box').css('top','+=40px')
+                //改變子彈發射位置
+                bulletStartH+=40;
+            }
+
+            //空白鍵(發射鍵)
+            if(event.which ===32){
+                //space=1 才允許發射
+                if(space === 1){
+                    //創造子彈
+                    $('.wrap').append(`<div class='bullet bullet${bulletitem}' style="top:${bulletStartH}px;left:${bulletStartW}px;"><img src="./images/bullet.png"><div>`)
+                    //設定子彈位置
+                    // $(`.bullet${bulletitem}`).css({
+                    //     top:`${bulletStartH}px`,
+                    //     left:`${bulletStartW}px`,
+                    // })
+                    //創造下一枚子彈編號
+                    bulletitem++;
+                }
+            }
+            // console.log('-------------------------------')
+        })
+
+        
+        //利用時間控制子彈飛行速度
+        setInterval(()=>{
+            //需要判斷子彈是否存在 停止迴圈
+            if($('.bullet').length>0){
+                bulletfly()
+            }
+        },50)
+        
+        //子彈飛行計算
+        function bulletfly(){
+            //對每一顆子彈進行計算
+            for(let i =0;i < bulletitem;i++){
+                //判斷該子彈i存不存在
+                if($(`.bullet${i}`).length>0){
+                    //如果子彈i打到邊界,就消除子彈i
+                    if(parseInt($(`.bullet${i}`).css('left'))>=800-parseInt($(`.bullet${i}`).css('width'))){
+                        $(`.bullet${i}`).remove()
+                        continue;
+                    }
+                    //否則子彈就繼續飛
+                    $(`.bullet${i}`).css('left','+=10px');
+                //不存在就進行下一顆子彈
+                }else{
+                    continue;
+                }
+            }
+        }
+
+        let monstercreatespeed =500;
+        //創造怪物時間控制
+        let  monsterCreateInterval;
+        function startMonsterCreateInterval(){
+            monsterCreateInterval=setInterval(()=>{
+            //亂數創造怪物高度
+            // console.log("怪物產生")
+            monsterH= Math.random()*100*4
+            //如果高度+怪物身高爆掉的話 就別生產這隻了 (怪物身高寫死QQ) 
+            //如果高度低於子彈發射高度也別生產
+            if(monsterH + 50<= 400 && (monsterH > 45)){
+                monsterCreate()
+            }
+        },monstercreatespeed)
+        }
+
+
+        let monsterMovespeed = 50;
+        // 怪物移動時間控制
+        let monsterMoveInterval;
+        function startMonsterMoveInterval(){
+        monsterMoveInterval = setInterval(()=>{
+            monsterMove();
+        },monsterMovespeed)
+        }
+
+
+        // 判斷碰撞
+        let collideInterval;
+        function startCollideInterval(){
+        collideInterval =setInterval(()=>{
+            //判斷是否存在子彈
+            if($('.bullet').length>0){
+                Collide();
+            }else{
+            }
+        },50)
+        }
+
+
+        //創造怪物
+        function monsterCreate(){
+            // $('.wrap').append(`<div class="monster monster${monster}" ><img src="./images/monster.png" alt=""></div>`)
+            $('.wrap').append(`<div class="monster monster${monster}" style="top:${monsterH}px;right:${monsterW}px;"><img src="./images/monster.png" alt=""></div>`)
+            //設定怪物位置
+            // $(`.monster${monster}`).css({
+            //     top:`${monsterH}px`,
+            //     right:`${monsterW}px`,
+            // })
+            //創造下一隻怪物
+            monster+=1;
+        }
+
+
+        //怪物移動
+        function monsterMove(){
+            //計算每一隻怪物前進
+            for(let i =0;i<monster;i++){
+                $(`.monster${i}`).css('right','+=5px')
+                if(parseInt($(`.monster${i}`).css('right'))>=(800-monsterwidth)){
+                    console.log('結束')
+                    //清除標籤
+                    $(`.monster`).remove()
+                    //停止計算時間 遊戲結束
+                    clearInterval(monsterMoveInterval)
+                    clearInterval(monsterCreateInterval)
+                    clearInterval(collideInterval)
+                    //消除子彈
+                    $(`.bullet`).remove()
+                    //移除遊戲畫面
+                    $('.gamestart').remove();
+                    $('.explosion').remove();
+                    //紀錄分數
+                    $('.record').append(`<div>第${round}局,您的分數是${score}分</div>`)
+                    //下一局局數
+                    round+=1;
+                    // 分數歸零
+                    $('.score').text(`分數:0分`)
+                    score=0
+                    //空白鍵調整成不啟動
+                    space=0
+                    //難度初始化
+                    monsterMovespeed=50;
+                    monstercreatespeed = 500;
+                    //子彈編號歸0
+                    bulletitem = 0
+                    //設定怪物編號
+                    monster=0;
+                    //重新拿回start
+                    $('.wrap').append(`<div class='start'><img src="./images/start-game.jpg"></div>`)
+                    break
+                }
+            }
+        }
+
+        //碰撞計算
+        //要同時有子彈跟怪物這個函式才會運行
+        function Collide(){ 
+            for(let i = 0;i<bulletitem;i++){
+                for(let y= 0;y<monster;y++){
+                    //判斷i子彈是否存在
+                    if($(`.bullet${i}`).length>0){
+                        //子彈高度>怪物高度 & 子彈高度<怪物高度+身高-子彈的高度
+                        if(parseInt($(`.bullet${i}`).css('top')) >= parseInt($(`.monster${y}`).css('top')) && parseInt($(`.bullet${i}`).css('top'))<=parseInt($(`.monster${y}`).css('top'))+parseInt($(`.monster${y}`).css('height'))-parseInt($(`.bullet${i}`).css('height'))){
+                            //子彈飛行距離+子彈本身長度+怪物長度+怪物飛行距離=800
+                            if(parseInt($(`.bullet${i}`).css('left'))+parseInt($(`.bullet${i}`).css('width'))+parseInt($(`.monster${y}`).css('right'))+monsterwidth >= 840){
+
+                                //同時清除子彈跟怪物
+                                $('.wrap').append(`<div class='explosion'><img src="./images/explosion.png"><div></div>`)
+                                //生成爆炸
+                                explosionTop = $(`.bullet${i}`).css('top')
+                                // console.log($(`.bullet${i}`).css('top'))
+                                explosionleft = $(`.bullet${i}`).css('left')
+                                $('.explosion').css({
+                                    top:`${explosionTop}`,
+                                    left:`${explosionleft}`
+                                })
+                                //子彈與怪物銷毀
+                                $(`.monster${y}`).remove() 
+                                $(`.bullet${i}`).remove() 
+
+                                let explosioninternal;
+                                if($('.explosion').length>0){
+                                    explosioninternal = setTimeout(()=>{
+                                        $('.explosion').remove()
+                                    },500)
+                                }
+                                // 分數計算
+                                score+=1;
+                                $('.score').text(`分數:${score}分`)
+                                //難度提升
+                                if(score>=15 && score < 16){
+                                    //難度提升 提示
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
+                                    monstercreatespeed=400;
+                                    monsterMovespeed=40;
+                                    clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
+                                    startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
+                                }
+                                if(score>=20 && score<21){
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
+                                    // monstercreatespeed=400;
+                                    monsterMovespeed=30;
+                                    // clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
+                                    // startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
+                                }
+                                if(score>=30  && score<31){
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
+                                    monstercreatespeed=400;
+                                    monsterMovespeed=20;
+                                    clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
+                                    startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
+                                }
+                                if(score>=40 && score<41){
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
+                                    monstercreatespeed=400;
+                                    monsterMovespeed=15;
+                                    clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterMoveInterval);
+                                    startMonsterCreateInterval();
+                                    startMonsterMoveInterval();
+                                }
+                            }
+                        }
+                    }else{
+                        continue;
+                    }
+                }
+            }
+        }
+    
+ 
+    </script>
+</body>
+</html>
+
