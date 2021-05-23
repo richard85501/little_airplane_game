@@ -16,7 +16,7 @@
             background-color: #ccc;
             position: relative;
             /* 遮蔽怪物出現 */
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         .box{
@@ -61,13 +61,20 @@
 
         .levelup{
             width: 200px;
-            /* box-shadow: 10px 10px 5px rgb(161, 159, 31); */
         }
 
         .levelup img{
             width: 100%;
         }
 
+        .levelupdiv{
+            display:flex;
+            justify-content: center;
+            position: absolute;
+            top:5px;
+            /* 讓寬度回到100% */
+            width: 100%;
+        }
 
     </style>
 </head>
@@ -85,8 +92,6 @@
         <div class="align-self-center ml-5">空白鍵發射子彈</div>
     </div>
     <div class="record mx-auto"></div>
-    <!-- $('.wrap').append(`<div class="monster monster${monster}"><img src="./images/monster.png" alt=""></div>`) -->
-    <div class="levelup"><img src="./images/levelup.png" alt=""></div>
 
     <script
       src="https://code.jquery.com/jquery-3.6.0.js"
@@ -346,7 +351,11 @@
                                 $('.score').text(`分數:${score}分`)
                                 //難度提升
                                 if(score>=15 && score < 16){
-                                    
+                                    //難度提升 提示
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
                                     monstercreatespeed=400;
                                     monsterMovespeed=40;
                                     clearInterval(monsterCreateInterval);
@@ -354,15 +363,23 @@
                                     startMonsterCreateInterval();
                                     startMonsterMoveInterval();
                                 }
-                                if(score>=25 && score<26){
+                                if(score>=20 && score<21){
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
                                     // monstercreatespeed=400;
                                     monsterMovespeed=30;
                                     // clearInterval(monsterCreateInterval);
                                     clearInterval(monsterMoveInterval);
-                                    startMonsterCreateInterval();
+                                    // startMonsterCreateInterval();
                                     startMonsterMoveInterval();
                                 }
-                                if(score>=60  && score<61){
+                                if(score>=30  && score<31){
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
                                     monstercreatespeed=300;
                                     monsterMovespeed=20;
                                     clearInterval(monsterCreateInterval);
@@ -370,10 +387,14 @@
                                     startMonsterCreateInterval();
                                     startMonsterMoveInterval();
                                 }
-                                if(score>=100 && score<101){
-                                    // monstercreatespeed=300;
+                                if(score>=40 && score<41){
+                                    $('.gamestart').append(`<div class="levelupdiv"><div class='levelup'><img src="./images/levelup.PNG"></div></div>`) 
+                                    setTimeout(()=>{
+                                        $('.levelupdiv').remove()
+                                    },1000)
+                                    monstercreatespeed=200;
                                     monsterMovespeed=15;
-                                    // clearInterval(monsterCreateInterval);
+                                    clearInterval(monsterCreateInterval);
                                     clearInterval(monsterMoveInterval);
                                     startMonsterCreateInterval();
                                     startMonsterMoveInterval();
